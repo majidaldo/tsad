@@ -13,28 +13,34 @@ def const(xs,**kwargs):
     cs=np.empty(len(xs));cs.fill(c)
     return cs
 
-nts=np.empty((10,len(xs)))
+nts=np.empty((1000,len(xs)))
 for i in xrange(len(nts)):
     nts[i]=sinewave(xs,nw=(i+1)*2)
-    
-nc=10#len(nts)   
-pd=decomp.PCA(n_components=nc)
+
+
+nc=int(len(nts)*.5)
+#pd=decomp.PCA(n_components=nc)
+#pd=decomp.KernelPCA(n_components=nc)
 #pd=decomp.RandomizedPCA(n_components=3)#'mle')
-#pd=decomp.FastICA(max_iter=int(1e3),n_components=nc)
-#pd=decomp.SparsePCA(n_components=nc,n_jobs=4) #NOT sparse coding! just alot of zeros
+pd=decomp.FastICA(max_iter=int(3e3),n_components=nc)
+#pd=decomp.SparsePCA(n_components=nc,n_jobs=4) #NOT sparse coding! just alot of zeros..too slow
 pdc=pd.fit(nts)
-sigspc=pdc.components_
+#sigspc=pdc.components_
 
 #find which u/s scheme gives least number of components
-x=np.array([sinewave(xs,nw=20)])
+x=np.array([sinewave(xs,nw=4)+sinewave(xs,nw=6)])
 #x=np.array([const(xs,c=3)]) #zero is trivial though
 
-sc=decomp.sparse_encode( x,  sigspc )
+#sc=decomp.sparse_encode( x,  sigspc )
 
 #scc=sc.transform( x  )
 #sc=decomp.SparseCoder(np.array(  [[1.,0],[333,0]]   ))
-#scc=sc.transform( np.array( [[3,4]]  )   )
+#scc=sc.transform( nts  )
 
 #need to be careful about orthogonal. it the folowing ok?
 #reconstruct signal
-recon=np.dot(sc,sigspc)
+
+#recon=np.dot(sc,sigspc) # assumes mean is zero?
+#can do pd.transform
+recon=pd.inverse_transform(pd.transform(nts))
+
