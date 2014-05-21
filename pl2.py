@@ -1,7 +1,7 @@
 import numpy as np
 import scipy as sp
 
-xs=np.linspace(0,1,10e3)
+xs=np.linspace(0,1,1e3)
 
 def sinewave(xs,**kwargs):
     nw=kwargs.setdefault('nw',100) #num waves
@@ -38,9 +38,11 @@ mdl=pylearn2.models.autoencoder.Autoencoder(
 algo=pylearn2.training_algorithms.sgd.SGD(
     .05
     ,cost=pylearn2.costs.autoencoder.MeanSquaredReconstructionError()#.cost locks up puter!
-    ,termination_criterion=termination_criteria.EpochCounter(100)
-    ,batch_size=50
+    ,termination_criterion=termination_criteria.EpochCounter(10000)
+    ,batch_size=1#10?100?
     )
 
 trn=pylearn2.train.Train(ds,mdl,algorithm=algo)
 #do i need a Y for autoencoder?
+
+#to train: trn.main_loop()
