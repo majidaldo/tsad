@@ -17,7 +17,7 @@ def const(xs,**kwargs):
 nts=np.empty((100,len(xs)))
 for i in xrange(len(nts)):
     nts[i]=sinewave(xs,nw=(i+1)*2)
-nts[-1]=const(xs,c=1000)
+nts[-1]=const(xs,c=1)
 
 nc=int(len(nts)*.5)
 #pd=decomp.PCA(n_components=nc)
