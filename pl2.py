@@ -50,9 +50,9 @@ mdl=pylearn2.models.autoencoder.Autoencoder(
 algo=pylearn2.training_algorithms.sgd.SGD(
     .05
     ,cost=pylearn2.costs.autoencoder.MeanSquaredReconstructionError()#.cost locks up puter!
-    #,termination_criterion=termination_criteria.MonitorBased(
-    #    channel_name='objective',prop_decrease=.01,N=10)#chnl def in SGD
-    ,termination_criterion=termination_criteria.EpochCounter(1000)
+    ,termination_criterion=termination_criteria.MonitorBased(
+        channel_name='objective',prop_decrease=.001,N=10)#chnl def in SGD
+    #,termination_criterion=termination_criteria.EpochCounter(1000)
     ,monitoring_dataset=ds
     ,batch_size=1#10?100?
     )
