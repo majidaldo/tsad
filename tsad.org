@@ -1,2 +1,11 @@
 * Computer
   - underclock system it's too hot!
+
+* Experiment
+  - nhidden
+
+* pyleanr2
+  - smaller data was faster on cpu. gpu shuffling?
+
+* Algorithm:
+  - need to have invariance wrt time
