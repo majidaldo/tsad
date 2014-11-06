@@ -1,17 +1,5 @@
 """Given a sequence, provides sliding windows of each length as a callable"""
 
-from itertools import islice
-
-def window(seq, n):
-    "Returns a sliding window (of width n) over data from the iterable"
-    "   s -> (s0,s1,...s[n-1]), (s1,s2,...,sn), ...                   "
-    it = iter(seq)
-    result = tuple(islice(it, n))
-    if len(result) == n:
-        yield result    
-    for elem in it:
-        result = result[1:] + (elem,)
-        yield result
 
 from random import randrange
 # implement its own shuffling
@@ -38,19 +26,33 @@ def irandrange(rng):
 #each window size and window jump determines how many windows can be made
 #find common number of windows for 
 
-def iwin(win_shuffle=True, winsize_shuffle=True):#(seq, batch_size):
+
+def iwin(n,winloc_shuffle=True, winsize_shuffle=True):#(seq, batch_size):
+    #this is just the logic of the sliding window minibatch
     # yields (windowsize, index)
     #just needs length of seq
-    seq=[1,2,3,4,5,6,7,8,9,0]
-    n=len(seq)
+    #seq=[1,2,3,4,5,6,7,8,9,0]
+    #n=len(seq)
     batch_size = 3
     min_winsize = 2
     slide_jump = 1
-    #max_winsize = n - batch_size + 1 #- slide_jump + 1
+    winsize_jump = 1
+    max_winsize = n #- batch_size + 1 #- slide_jump + 1
 
-    winsize_rng=(min_winsize,max_winsize,1)
-    if winsize_shuffle==True: iwsr=irandrange(*win_rng)
-    else: iwsr=(xrange(*win_rng))
-    win_rng
+    winsize_rng = (min_winsize,max_winsize,winsize_jump)
+    if winsize_shuffle == True: iws = irandrange(winsize_rng)
+    else: iws=(xrange(winsize_rng))
+    if winloc_shuffle == True: iwlf = irandrange
+    else: iwlf=xrange
+    for winsize in iws:
+        iwl = iwlf((0,n,slide_jump))
+        winlocs=[]
+        for winloc in iwl:
+            winlocs.append(winloc)
+            if len(winlocs)==batch_size:
+                yield winsize , winlocs
+                winlocs=[]
+         #the remainding from the location looping
+        if len(winlocs)!=0: yield winsize,winlocs
 
     
