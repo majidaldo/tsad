@@ -1,4 +1,5 @@
-"""Given a sequence, provides sliding windows of each length as a callable"""
+"""has functions to handle segmenting a long timeseries for consumption
+in a neural network"""
 
 
 from random import randrange
@@ -8,7 +9,7 @@ from random import randrange
 #need to gen window sizes range(,,)
 #need to gen intervals over all the ts
 
-def irandrange(rng):
+def irandrange(*rng):
     #should be a primitive
     """gives a random number in rng until numbers are exhausted"""
     try: rng=int(rng)
@@ -23,29 +24,22 @@ def irandrange(rng):
             yield pick
 
 
-#each window size and window jump determines how many windows can be made
-#find common number of windows for 
-
-
 def iwin(T, batch_size=32
          , min_winsize= 10, slide_jump=1, winsize_jump=1
          ,max_winsize='T'
-         ,winloc_shuffle=True, winsize_shuffle=True):#(seq, batch_size):
-    #this is just the logic of the sliding window minibatch
-    # yields (windowsize, index of sliding window)
-    #just needs length of seq
-    #seq=[1,2,3,4,5,6,7,8,9,0]
-    #n=len(seq)
-    if max_winsize=='T': max_winsize = T #- batch_size + 1 #- slide_jump + 1
+         ,winloc_shuffle=True, winsize_shuffle=True):
+    """this is just the logic of the sliding window minibatch
+     yields (windowsize, indexes of sliding window) """
+    if max_winsize=='T': max_winsize = T
     else: T=int(T)
 
     winsize_rng = ( min_winsize, max_winsize, winsize_jump )
-    if winsize_shuffle == True: iws = irandrange(winsize_rng)
-    else: iws=(xrange(winsize_rng))
+    if winsize_shuffle == True: iws = irandrange(*winsize_rng)
+    else: iws=xrange(*winsize_rng)
     if winloc_shuffle == True: iwlf = irandrange
     else: iwlf=xrange
     for winsize in iws:
-        iwl = iwlf((0,T,slide_jump))
+        iwl = iwlf(*(0,T,slide_jump))
         winlocs=[]
         for winloc in iwl:
             if (T-winsize)<winloc: continue
@@ -53,7 +47,7 @@ def iwin(T, batch_size=32
             if len(winlocs)==batch_size:
                 yield winsize , winlocs
                 winlocs=[]
-         #the remainding from the location looping
+         #the remainig from the location looping
         if len(winlocs)!=0: yield winsize,winlocs
 
     
