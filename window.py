@@ -3,11 +3,7 @@ in a neural network"""
 
 
 from random import randrange
-# implement its own shuffling
-# shuffle batches (winsize) and shuffle minibatches (batchsize)
 
-#need to gen window sizes range(,,)
-#need to gen intervals over all the ts
 
 def irandrange(*rng):
     #should be a primitive
@@ -28,8 +24,9 @@ def iwin(T, batch_size=32
          , min_winsize= 10, slide_jump=1, winsize_jump=1
          ,max_winsize='T'
          ,winloc_shuffle=True, winsize_shuffle=True):
-    """this is just the logic of the sliding window minibatch
-     yields (windowsize, indexes of sliding window) """
+    """this is just the (separated out) logic of the 
+    sliding window minibatch
+    returns: (windowsize, indexes of sliding window) """
     if max_winsize=='T': max_winsize = T
     else: T=int(T)
 
@@ -50,4 +47,11 @@ def iwin(T, batch_size=32
          #the remainig from the location looping
         if len(winlocs)!=0: yield winsize,winlocs
 
-    
+def winbatch(seq, batch_igen=iwin, **kwargs):
+    """first axis of sequence should be time"""
+    bi=batch_igen(len(seq),**kwargs)
+    for awinsize , iwinlocs in bi:
+        abatch=[]
+        for awinloc in iwinlocs:
+            abatch.append(seq[awinloc:awinloc+awinsize])
+        yield abatch
