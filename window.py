@@ -47,6 +47,10 @@ def iwin(T, batch_size=32
          #the remainig from the location looping
         if len(winlocs)!=0: yield winsize,winlocs
 
+#make a function that advises possible batch sizes for
+#certain jumps andd sizes..thinking brute force to just get something 
+#working. set.add(length of window locations for all window sizes)
+
 def winbatch(seq, batch_igen=iwin, **kwargs):
     """first axis of sequence should be time"""
     bi=batch_igen(len(seq),**kwargs)
@@ -55,3 +59,10 @@ def winbatch(seq, batch_igen=iwin, **kwargs):
         for awinloc in iwinlocs:
             abatch.append(seq[awinloc:awinloc+awinsize])
         yield abatch
+
+#the network has a batchsize argument that means batch_size must be fixed
+#also the number of input nodes = the dimensionality of the ts
+def winbatch_fixed(*args,**kwargs):
+    wbi=winbatch(*args,**kwargs)
+    for abatch in wbi:
+        if len(abatch)!=batchsize : pass it up and go to next one
