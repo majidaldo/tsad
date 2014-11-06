@@ -27,27 +27,28 @@ def irandrange(rng):
 #find common number of windows for 
 
 
-def iwin(n,winloc_shuffle=True, winsize_shuffle=True):#(seq, batch_size):
+def iwin(T, batch_size=32
+         , min_winsize= 10, slide_jump=1, winsize_jump=1
+         ,max_winsize='T'
+         ,winloc_shuffle=True, winsize_shuffle=True):#(seq, batch_size):
     #this is just the logic of the sliding window minibatch
-    # yields (windowsize, index)
+    # yields (windowsize, index of sliding window)
     #just needs length of seq
     #seq=[1,2,3,4,5,6,7,8,9,0]
     #n=len(seq)
-    batch_size = 3
-    min_winsize = 2
-    slide_jump = 1
-    winsize_jump = 1
-    max_winsize = n #- batch_size + 1 #- slide_jump + 1
+    if max_winsize=='T': max_winsize = T #- batch_size + 1 #- slide_jump + 1
+    else: T=int(T)
 
-    winsize_rng = (min_winsize,max_winsize,winsize_jump)
+    winsize_rng = ( min_winsize, max_winsize, winsize_jump )
     if winsize_shuffle == True: iws = irandrange(winsize_rng)
     else: iws=(xrange(winsize_rng))
     if winloc_shuffle == True: iwlf = irandrange
     else: iwlf=xrange
     for winsize in iws:
-        iwl = iwlf((0,n,slide_jump))
+        iwl = iwlf((0,T,slide_jump))
         winlocs=[]
         for winloc in iwl:
+            if (T-winsize)<winloc: continue
             winlocs.append(winloc)
             if len(winlocs)==batch_size:
                 yield winsize , winlocs
