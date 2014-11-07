@@ -60,9 +60,12 @@ def iwin_fixed(*args,**kwargs):
         else: yield awinsize,winlocs
 
 
-def winbatch(seq, batch_igen=iwin_fixed, **kwargs):
-    """first axis of numpy sequence should be time"""
+def winbatch_gen(seq, batch_igen=iwin_fixed, **kwargs):
+    """creates batches for consumption by RNN
+    first axis of numpy sequence should be time"""
     import numpy as np
+    if seq.ndim!=2: 
+        raise ValueError('seq needs to be 2D. if 1D try seq=seq[:,None]')
     bi=batch_igen(len(seq),**kwargs)
     for awinsize , iwinlocs in bi:
         abatch=[]
@@ -70,3 +73,11 @@ def winbatch(seq, batch_igen=iwin_fixed, **kwargs):
             abatch.append(seq[awinloc:awinloc+awinsize])
         yield np.array(abatch,dtype=abatch[0].dtype).swapaxes(0,1)
 
+class winbatch(object):
+    """a callable version of winbatch_gen for theanonets"""
+
+    def __init__(self,*args,**kwargs):
+        self.mybatch_gen=winbatch_gen(*args,**kwargs)
+
+    def __call__(self):
+        return  self.mybatch_gen.next()
