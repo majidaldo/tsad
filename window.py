@@ -26,11 +26,14 @@ def iwin(T, batch_size=32
          ,winloc_shuffle=True, winsize_shuffle=True):
     """this is just the (separated out) logic of the 
     sliding window minibatch
-    returns: (windowsize, indexes of sliding window) """
+    returns: (windowsize, indexes of sliding window)
+    it returns batch sizes <= batch_size so it's not strict
+    """
+    assert max_winsize>=min_winsize
     if max_winsize=='T': max_winsize = T
     else: T=int(T)
 
-    winsize_rng = ( min_winsize, max_winsize, winsize_jump )
+    winsize_rng = ( min_winsize, max_winsize+1, winsize_jump )
     if winsize_shuffle == True: iws = irandrange(*winsize_rng)
     else: iws=xrange(*winsize_rng)
     if winloc_shuffle == True: iwlf = irandrange
@@ -47,22 +50,23 @@ def iwin(T, batch_size=32
          #the remainig from the location looping
         if len(winlocs)!=0: yield winsize,winlocs
 
-#make a function that advises possible batch sizes for
-#certain jumps andd sizes..thinking brute force to just get something 
-#working. set.add(length of window locations for all window sizes)
 
-def winbatch(seq, batch_igen=iwin, **kwargs):
-    """first axis of sequence should be time"""
+def iwin_fixed(*args,**kwargs):
+    """a version that returns batches of the size batch_size"""
+    batch_size=kwargs['batch_size']
+    iw=iwin(*args,**kwargs)
+    for awinsize,winlocs in iw:
+        if len(winlocs)!=batch_size : continue
+        else: yield awinsize,winlocs
+
+
+def winbatch(seq, batch_igen=iwin_fixed, **kwargs):
+    """first axis of numpy sequence should be time"""
+    import numpy as np
     bi=batch_igen(len(seq),**kwargs)
     for awinsize , iwinlocs in bi:
         abatch=[]
         for awinloc in iwinlocs:
             abatch.append(seq[awinloc:awinloc+awinsize])
-        yield abatch
+        yield np.array(abatch,dtype=abatch[0].dtype).swapaxes(0,1)
 
-#the network has a batchsize argument that means batch_size must be fixed
-#also the number of input nodes = the dimensionality of the ts
-def winbatch_fixed(*args,**kwargs):
-    wbi=winbatch(*args,**kwargs)
-    for abatch in wbi:
-        if len(abatch)!=batchsize : pass it up and go to next one
