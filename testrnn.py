@@ -20,15 +20,3 @@ ecgb=winbatch(np.loadtxt('ecg.txt',dtype='f32')[:,None]
 #e.run(ecgb, ecgb)
 #e.network.predict(batch)
 
-import numpy.random as rng
-def batches(args, X, horizon=None):
-    if horizon is None:
-        horizon = args.pool_error_start + 2
-    batch = np.zeros((horizon, args.batch_size, args.layers[0]), 'f')
-    def create_batch():
-        for b in range(args.batch_size):
-            x = X[rng.randint(len(X))]
-            i = rng.randint(len(x) - horizon)
-            batch[:, b] = x[i:i + horizon]
-        return [batch]
-    return create_batch
