@@ -80,4 +80,4 @@ class winbatch(object):
         self.mybatch_gen=winbatch_gen(*args,**kwargs)
 
     def __call__(self):
-        return  self.mybatch_gen.next()
+        return  [self.mybatch_gen.next()]
