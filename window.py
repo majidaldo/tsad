@@ -60,7 +60,8 @@ def iwin_fixed(*args,**kwargs):
         else: yield awinsize,winlocs
 
 
-def winbatch_gen(seq, batch_igen=iwin_fixed, batchproc_callback=lambda x:x ,**kwargs):
+def winbatch_gen(seq, batch_igen=iwin_fixed , batchproc_callback=lambda x:x 
+                 ,**kwargs):
     """creates batches for consumption by RNN
     first axis of numpy sequence should be time"""
     import numpy as np
@@ -73,11 +74,13 @@ def winbatch_gen(seq, batch_igen=iwin_fixed, batchproc_callback=lambda x:x ,**kw
             abatch.append((seq[awinloc:awinloc+awinsize]))
         yield batchproc_callback(np.array(abatch,dtype=abatch[0].dtype).swapaxes(0,1))
 
+
+from itertools import cycle
 class winbatch(object):
     """a callable version of winbatch_gen for theanonets"""
 
     def __init__(self,*args,**kwargs):
-        self.mybatch_gen=winbatch_gen(*args,**kwargs)
+        self.mybatch_gen=cycle(winbatch_gen(*args,**kwargs)) #itertools to the rescue!
 
     def __call__(self):
         return  [self.mybatch_gen.next()]
