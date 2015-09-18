@@ -111,7 +111,7 @@ def function(params):
     if len(netfind)==0:
         net=make_net(pc)
         del netfind
-        state='new';                                           stateit=0
+        state='new';                                            stateit=0
     else:
         # is there a previous net to resume from?
         lastiters=[arow['iter'] for arow in tbl.distinct('iter',**pc)]
