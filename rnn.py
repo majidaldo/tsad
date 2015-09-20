@@ -14,8 +14,8 @@ import dataset as ds
 
 dbfp='../files/rnn.sqlite'
 dbp='sqlite:///'+dbfp
-test=True
-if test==True:
+erase=False
+if erase==True:
     try: os.remove(dbfp)
     except: pass
 
@@ -86,14 +86,12 @@ ecgb_val=winbatch( ecg[tl:,None]
 # todo possible to have n1=0 nx=0 by just not having it there
 def make_net(params):
     p=params
+    layers=[1]
+    for alyr in xrange(params['nl']):
+        layers.append( dict(form='lstm',size=p['n']) )
+    layers.append(1)
     #net  = theanets.recurrent.Regressor(
-    net = theanets.recurrent.Autoencoder(
-            (1
-             #, dict(form='rnn',size=5,activation='relu')
-             , dict(form='lstm',size=p['n1'],activation='sigmoid')
-             #, dict(form='lstm',size=10,activation='linear')
-             , 1)
-    )
+    net = theanets.recurrent.Autoencoder(layers)
     return net
 
 
@@ -150,11 +148,12 @@ def function(params):
                        #,input_dropout=.3
                        ,nesterov=True
                        ,max_gradient_norm=1
-                       ,validate_every=1
                        #,learning_rate=0.0001
                        #,batch_size=bs
                        #,momentum=0.9
-                       #,patience=10
+                       ,min_improvement=.01
+                       ,patience=5
+                       ,validate_every=1
     )
 
 
@@ -167,9 +166,11 @@ def function(params):
     for ait in xrange(it):
         # there is 'err' and 'loss'. mostly the same
         # index 1 is the validation error
-        o= xpit.next()[1]['loss']
+        try: o= xpit.next()[1]['loss']
+        except StopIteration: pass
+            
     save_net(params,xp.network)
-    return o
+    return o #should return the o from the .next() w/o the stopiteration
 
 # maybe the obj function should be for validation set
 # todo see what to do with validation
