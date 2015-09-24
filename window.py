@@ -59,8 +59,8 @@ def iwin_fixed(*args,**kwargs):
         if len(winlocs)!=batch_size : continue
         else: yield awinsize,winlocs
 
-
-def winbatch_gen(seq, batch_igen=iwin_fixed , batchproc_callback=lambda x:x 
+batch_igen=iwin_fixed
+def winbatch_gen(seq, batch_igen=batch_igen , batchproc_callback=lambda x:x 
                  ,**kwargs):
     """creates batches for consumption by RNN
     first axis of numpy sequence should be time"""
@@ -72,7 +72,7 @@ def winbatch_gen(seq, batch_igen=iwin_fixed , batchproc_callback=lambda x:x
         abatch=[]
         for awinloc in iwinlocs:
             abatch.append((seq[awinloc:awinloc+awinsize]))
-        yield batchproc_callback(np.array(abatch,dtype=abatch[0].dtype).swapaxes(0,1))
+        yield batchproc_callback(np.array(abatch,dtype=abatch[0].dtype))
 
 
 from itertools import cycle
@@ -80,7 +80,33 @@ class winbatch(object):
     """a callable version of winbatch_gen for theanonets"""
 
     def __init__(self,*args,**kwargs):
+        self.length=kwargs.setdefault('length',None)
+        kwargs.pop('length')
         self.mybatch_gen=cycle(winbatch_gen(*args,**kwargs)) #itertools to the rescue!
+        seq=args[0]
+        self._len_gen=batch_igen(len(seq),**kwargs)
 
     def __call__(self):
         return  [self.mybatch_gen.next()]
+
+    def __len__(self):
+        count=0
+        for i in self._len_gen: count+=1
+        return count
+        
+
+
+from itertools import islice
+def window(seq, size=2):
+    """"
+    Returns a sliding window (of width n) over data from the iterable
+       s -> (s0,s1,...s[n-1]), (s1,s2,...,sn), ...                   
+    """
+    n=size
+    it = iter(seq)
+    result = tuple(islice(it, n))
+    if len(result) == n:
+        yield result    
+    for elem in it:
+        result = result[1:] + (elem,)
+        yield result
