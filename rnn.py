@@ -1,34 +1,51 @@
 import theanets
 import numpy as np
 
-from window import winbatch
 import climate
 climate.enable_default_logging()
 
-
-import inspect
 import os
-fp=os.path.split(os.path.realpath(__file__))[0];
-os.chdir(fp)
-import dataset as ds
+import dataset
 
-dbfp='../files/rnn.sqlite'
-dbp='sqlite:///'+dbfp
-erase=False
-if erase==True:
-    try: os.remove(dbfp)
-    except: pass
+import data
 
-db=ds.connect(dbp)
-tbl=db['rnns']
 
-#IDEA!! mkae if the optimizer wanst training iter #20 directre,
-#just go through the iterations.
-#also can make it 'noise' by just making another instance
+def env(ts_id):
+    
+    global mydir
+    global db
+    global tbl
 
-# n each layer
-# n iter
-# n 
+    global trn
+    global vld
+    global dim_out
+    global dim_in
+    global noise
+    
+    mydir=os.path.split(os.path.realpath(__file__))[0];
+    os.chdir(mydir)
+
+    dbfp=os.path.join('experiments',ts_id,'output','rnn.sqlite')
+    #dbfp='test.sqlite'
+    dbp='sqlite:///'+dbfp
+    erase=False #for testing =True
+    if erase==True:
+        try: os.remove(dbfp)
+        except: pass
+
+    db=dataset.connect(dbp)
+    tbl=db[ts_id]
+
+    ts=data.get(ts_id) 
+    tl=int(.75*len(ts))
+    trn=data.list_call(ts[:tl])
+    vld=data.list_call(ts[tl:])
+    dim_out=dim_in=data.dim(ts_id)
+
+    noise=np.std(data.get_series(ts_id))
+    
+        
+
 
 
 def get_net(params,i=-1): # n -1 gets the last one interted
@@ -40,7 +57,7 @@ def get_net(params,i=-1): # n -1 gets the last one interted
     found=found[i] # get's the last one inserted
 
     try:
-        tfp=ntf(dir=fp,suffix='.tmp',delete=False)
+        tfp=ntf(dir=mydir,suffix='.tmp',delete=False)
         with open(tfp.name,'wb') as f: f.write(found['net'])
         tfp.close()
         net=theanets.Network.load(tfp.name)
@@ -49,56 +66,40 @@ def get_net(params,i=-1): # n -1 gets the last one interted
     return net
 
 from tempfile import NamedTemporaryFile as ntf
-def save_net(params,net):
+def save_net(params,net,run_id=None):
     
     pc=params.copy()
-    #nn=len(list(tbl.find(**pc)))
-    #if nn>1: raise Exception('more than one model matched params')
 
     try:
-        tfp=ntf(dir=fp,suffix='.tmp',delete=False)
+        tfp=ntf(dir=mydir,suffix='.tmp',delete=False)
         net.save(tfp.name)
         with open(tfp.name,'rb') as f: pc['net']=buffer(f.read())
         tfp.close()
     finally: #cleanup
         os.remove(tfp.name)
 
-    #if   nn==0: to=tbl.insert(pc)
-    #elif nn==1: to=tbl.update(pc,pc.keys()) #returns false
+    if run_id != None: pc['run_id']=run_id
     return tbl.insert(pc)
 
 
-bs=50
-#batchproc_callback
-ecg=np.loadtxt('ecg.txt',dtype='f32')[::10]
-sn=(.2*np.sin(np.linspace(0,3*3.14,num=350-250)))
-#put anomaly in input
-ecg[250:350]=sn
-tl=int(.7*len(ecg))
-ecgb_trn=winbatch( ecg[:tl,None]
-                    , min_winsize= 50, slide_jump=10, winsize_jump=10
-              ,batch_size=bs)
-ecgb_val=winbatch( ecg[tl:,None]
-                    ,min_winsize= 50, slide_jump=10, winsize_jump=10
-              ,batch_size=bs)
 
 
-# todo possible to have n1=0 nx=0 by just not having it there
 def make_net(params):
     p=params
-    layers=[1]
+    layers=[dim_in]
     for alyr in xrange(params['nl']):
-        layers.append( dict(form='lstm',size=p['n']) )
-    layers.append(1)
+        layers.append( dict(form='lstm' #'rnn'
+                            ,size=p['n']
+                            ,activation='sigmoid' #ignored on lstm
+                            ) )
+    layers.append(dim_out)
     #net  = theanets.recurrent.Regressor(
     net = theanets.recurrent.Autoencoder(layers)
     return net
 
 
-# todo make trn and val rnd
 
-
-def function(params):
+def function(params,run_id=None):
 
     # get network
     
@@ -109,24 +110,28 @@ def function(params):
     if len(netfind)==0:
         net=make_net(pc)
         del netfind
-        state='new';                                            stateit=0
+        state                             ='new';                 stateit=0
     else:
         # is there a previous net to resume from?
-        lastiters=[arow['iter'] for arow in tbl.distinct('iter',**pc)]
-        lastiter=sorted(lastiters)
-        lastiter=lastiter[-1]
-        # chk how many lastiter vs thisiter
-        thisiters=list(tbl.find(**params))
-        pcc=pc.copy()
-        pcc['iter']=lastiter
-        lastiters=list(tbl.find(**pcc))
-        nthisiter=len(thisiters)
-        nlastiter=len(lastiters)
+        lastiters=[arow['iter'] for arow in tbl.distinct('iter',**pc) \
+                   if arow['iter']<params['iter']]
+        if len(lastiters)==0:        state='no previous iter';    stateit=1
+        else:
+            lastiter=sorted(lastiters)
+            lastiter=lastiter[-1]
+        
+            # chk how many lastiter vs thisiter
+            thisiters=list(tbl.find(**params))
+            pcc=pc.copy()
+            pcc['iter']=lastiter
+            lastiters=list(tbl.find(**pcc))
+            nthisiter=len(thisiters)
+            nlastiter=len(lastiters)
 
-        if len(lastiters)==0:      state='no previous iter';    stateit=1
-        elif nthisiter>=nlastiter: state='no previous iter';    stateit=2
-        elif nthisiter<nlastiter:  state='previous iter found'; stateit=3
-        else: raise Exception('undefined state')
+        
+            if nthisiter>=nlastiter: state='no previous iter';    stateit=2
+            elif nthisiter<nlastiter:state='previous iter found'; stateit=3
+            else: raise Exception('undefined state')
 
         if state=='previous iter found':
             pcc=pc.copy()
@@ -141,21 +146,19 @@ def function(params):
 
     xp=theanets.Experiment(net)
     
-    xpit=xp.itertrain( (ecgb_trn) , (ecgb_val) 
+    xpit=xp.itertrain( trn , vld
                        ,algorithm='rmsprop'
-                       #,save_progress='testrnn', save_every=1
-                       ,input_noise=.3
-                       #,input_dropout=.3
+                       ,input_noise=noise
+                       #,input_dropout=.3 #idk how this would app here
                        ,nesterov=True
-                       ,max_gradient_norm=1
-                       #,learning_rate=0.0001
+                       #,max_gradient_norm=1
+                       ,learning_rate=0.0001 #default
                        #,batch_size=bs
                        #,momentum=0.9
-                       ,min_improvement=.01
+                       ,min_improvement=.005
                        ,patience=5
                        ,validate_every=1
     )
-
 
     # assume iter index starts with 0
     if   stateit==0: it=params['iter']+1
@@ -163,17 +166,21 @@ def function(params):
     elif stateit==2: it=params['iter']+1
     elif stateit==3: it=params['iter']-lastiter
     else: raise Exception('undefined state')
+    print 'it',it
+    import math
     for ait in xrange(it):
         # there is 'err' and 'loss'. mostly the same
         # index 1 is the validation error
-        try: o= xpit.next()[1]['loss']
+        try:
+            o= xpit.next()[1]['loss']
+            if math.isnan(o):
+                raise ValueError('got nan validation')
         except StopIteration: pass
             
-    save_net(params,xp.network)
+    save_net(params,xp.network,run_id=run_id)
     return o #should return the o from the .next() w/o the stopiteration
 
-# maybe the obj function should be for validation set
-# todo see what to do with validation
+
 
 
 def test():

@@ -54,3 +54,8 @@ docs/_build/
 
 #emacs
 *.*~
+
+#experiment output
+experiments/*/output/
+
+.*

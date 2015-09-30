@@ -1,47 +1,117 @@
 import numpy as np
 from window import winbatch
 
-#todo make trning and vld data rnd
+import os
 
-def get_series(id,**kwargs):
+def get_series(id):
     """returns 2d shape (time,ndim)"""
+    
+    def txtrdr(*args,**kwargs):
+        kwargs.setdefault('dtype','f32')
+        return np.loadtxt(os.path.join('data',id),**kwargs)
+    
     if 'ecg' in id:
-        ecg=np.loadtxt('ecg.txt',dtype='f32')[::10][:,None]
-        tl=int(.7*len(ecg))
+        ecg=txtrdr()[::20,None] 
         if id=='ecg':
             return ecg
-        elif id=='ecg-trn':
+        elif id=='ecg-anom':
             ecg=get_series('ecg')
-            sn=(.2*np.sin(np.linspace(0,3*3.14,num=350-250)))
+            sn1=.25*ecg.shape[0]
+            sn2= .3*ecg.shape[0]
+            sn=(.2*np.sin(np.linspace(0,3*3.14,num=(sn2-sn1))))
             #put anomaly in input
-            ecg[550:650]=sn[:,None]
-            return ecg[:tl]
-        elif id=='ecg-vld':
-            return ecg[tl:]
-        else:
-            raise ValueError('series not found')
+            ecg[sn1:sn2]=sn[:,None]
+            return ecg
+        
+    elif 'sleep'==id:
+        #from https://physionet.org/atm/ucddb/ucddb002_lifecard.edf/180/60/rdsamp/csv/pS/samples.csv
+        return txtrdr(id,skiprows=2,delimiter=',')[::3,2,None]
+
+    #should not be here    
+    raise KeyError('series not found')
+
+
 
         
+def get_kwargs(id,**kwargs):
+    # nice to check the number of batches
+    # winbatch(ts,getKwargs(ts)).length should be 'reasonable'
+    
+    kwargs2=kwargs.copy()
+    
+    ts=get_series(id)
+    tnth=int(.1*len(ts))
+    kwargs.setdefault('min_winsize',        int(    tnth))
+    kwargs.setdefault('slide_jump' ,        int(.25*tnth))
+    kwargs.setdefault('winsize_jump',       int(.25*tnth))
+    kwargs.setdefault('batch_size',         10           )
+    
+    if 'ecg'==id:
+        kwargs['min_winsize']=  300
+        kwargs['slide_jump']=   20
+        kwargs['winsize_jump']= 20
+        kwargs['batch_size']=   50
+
+    elif 'sleep'==id:
+        kwargs['min_winsize']=  300
+        kwargs['slide_jump']=   20
+        kwargs['winsize_jump']= 20
+        kwargs['batch_size']=   50
+
+    else:
+        raise KeyError
+
+    # but the kwargs in the func arg overrides
+    for ak in kwargs2: kwargs[ak]=kwargs2[ak]
+            
+    return kwargs
+
+
+
 def get(id,**kwargs):
     """for consumption by rnn training"""
-    ts=get_series(id,**kwargs)
-    if 'ecg' in id:
-        kwargs.setdefault('min_winsize',200)
-        kwargs.setdefault('slide_jump',10)
-        kwargs.setdefault('winsize_jump',10)
-        kwargs.setdefault('batch_size',50)
-        return winbatch(ts,**kwargs)
+    
+    ts=get_series(id)
+    kwargs=get_kwargs(id,**kwargs)
+    
+    batches=[]
+    bg=winbatch(ts,**kwargs)
+    for i in xrange(bg.length):
+        batches.append(bg())
+        
+    return batches
+
 
 
 def dim(id):
-    if 'ecg' in id:
-        return get('ecg-trn').mybatch_gen.next().shape[2]
+    return get_series(id).shape[1]
 
 
-from window import window as win
+
+from window import slidingwindow as win
 def window(id,**kwargs):
     a=[]
-    ts=get_series(id,**kwargs)
+    ts=get_series(id)
     for awin in win(ts,**kwargs):
         a.append(awin)
     return np.array(a,dtype='f32')
+
+
+
+from itertools import cycle
+class list_call(object):
+
+    def __init__(self,tsbatch_list,**kwargs):
+        self.kwargs=kwargs
+        self.tsbatch_list=tsbatch_list
+        self.iter=cycle(self.__iter__())
+
+    def __iter__(self):
+        return iter(self.tsbatch_list)
+
+    def __call__(self):
+        return self.iter.next()
+
+    def __len__(self):
+        return len(self.tsbatch_list)
+        

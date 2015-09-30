@@ -1,13 +1,13 @@
 {
 
-    "experiment-name": "test",
+    "experiment-name": "sleep",
     "language"   : "PYTHON",
     
     "resources" : {
 	"my-machine" : {
 	    "scheduler"         : "local",
-	    "max-concurrent"    : 3,
-	    "max-finished-jobs" : 100
+	    "max-concurrent"    : 1,
+	    "max-finished-jobs" : 50
 	}
     },
 
@@ -34,10 +34,10 @@
 	    "max"  : 20
 	},
 	"iter" : {
-	    "type" : "INT",
+	    "type" : "FLOAT",
 	    "size" : 1,
 	    "min"  : 0,
-	    "max"  : 1000
+	    "max"  : 1
 	}
     }
 }
