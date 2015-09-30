@@ -31,6 +31,7 @@ def rootmap(y,scalex,p=.5):
 def itermap(y,mostiter=20):
     iterlim=99999
     
+    if y==1: y=.99999999
     o=int(math.ceil(rootmap(y,mostiter)))
     if o==mostiter: return iterlim
     else: return o
