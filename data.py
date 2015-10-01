@@ -1,6 +1,8 @@
 import numpy as np
 from window import winbatch
 
+import syn
+
 import os
 
 def get_series(id):
@@ -27,6 +29,10 @@ def get_series(id):
         #from https://physionet.org/atm/ucddb/ucddb002_lifecard.edf/180/60/rdsamp/csv/pS/samples.csv
         return txtrdr(id,skiprows=2,delimiter=',')[::3,2,None]
 
+    elif 'sin'==id:
+        #import syn
+        return syn.pulsegen()[:,None]
+
     #should not be here    
     raise KeyError('series not found')
 
@@ -42,24 +48,27 @@ def get_kwargs(id,**kwargs):
     ts=get_series(id)
     tnth=int(.1*len(ts))
     kwargs.setdefault('min_winsize',        int(    tnth))
-    kwargs.setdefault('slide_jump' ,        int(.25*tnth))
-    kwargs.setdefault('winsize_jump',       int(.25*tnth))
+    kwargs.setdefault('slide_jump' ,        int(.10*tnth))
+    kwargs.setdefault('winsize_jump',       int(.10*tnth))
     kwargs.setdefault('batch_size',         10           )
     
     if 'ecg'==id:
         kwargs['min_winsize']=  300
         kwargs['slide_jump']=   20
         kwargs['winsize_jump']= 20
-        kwargs['batch_size']=   50
+        kwargs['batch_size']=   30
 
     elif 'sleep'==id:
         kwargs['min_winsize']=  300
         kwargs['slide_jump']=   20
         kwargs['winsize_jump']= 20
-        kwargs['batch_size']=   50
+        kwargs['batch_size']=   30
 
-    else:
-        raise KeyError
+    elif 'sin'==id:
+        kwargs['batch_size']=   30
+
+    #else:
+    #    raise KeyError
 
     # but the kwargs in the func arg overrides
     for ak in kwargs2: kwargs[ak]=kwargs2[ak]
