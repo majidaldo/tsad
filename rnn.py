@@ -175,6 +175,7 @@ def function(params,run_id=None):
             o= xpit.next()[1]['loss']
             if math.isnan(o):
                 raise ValueError('got nan validation')
+            save_net(params,xp.network)
         except StopIteration: pass
             
     save_net(params,xp.network,run_id=run_id)
