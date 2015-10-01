@@ -1,5 +1,6 @@
 import json
-with open('config.json') as cf:
+ts_id='sin'
+with open('./experiments/'+ts_id+'/config.json') as cf:
     xpnm=json.load(cf)['experiment-name']
 
 # get data from db
@@ -52,12 +53,14 @@ def get_best_params():
     return best_params
 
 import rnn
-ts_id='sleep'
 rnn.env(ts_id)
 from rnn import tbl
+import omain
 def get_best_net():
     #assert(len(list(tbl.find(**best_params)))==1)
-    return rnn.get_net(get_best_params())
+    params=get_best_params()
+    params['iter']=omain.itermap(params['iter'])
+    return rnn.get_net(params)
 
 
 import matplotlib.pyplot as plt
