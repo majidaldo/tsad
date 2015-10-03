@@ -25,6 +25,7 @@ def env(ts_id):
     mydir=os.path.split(os.path.realpath(__file__))[0];
     os.chdir(mydir)
 
+    global dbfp
     dbfp=os.path.join('experiments',ts_id,'output','rnn.sqlite')
     #dbfp='test.sqlite'
     dbp='sqlite:///'+dbfp
@@ -44,12 +45,12 @@ def env(ts_id):
 
     noise=np.std(data.get_series(ts_id))*.5 #<- critical param
     
-        
 
 
 
 def get_net(params,i=-1): # n -1 gets the last one interted
     """get str rep from db and put it into a file"""
+    
     pc=params.copy()
     found=list(tbl.find(**pc))
     #if len(found)>1: raise Exception('more than one model matched params')
@@ -65,7 +66,9 @@ def get_net(params,i=-1): # n -1 gets the last one interted
         os.remove(tfp.name)
     return net
 
+
 from tempfile import NamedTemporaryFile as ntf
+from lockfile import LockFile as lf
 def save_net(params,net,run_id=None):
     
     pc=params.copy()
@@ -79,8 +82,12 @@ def save_net(params,net,run_id=None):
         os.remove(tfp.name)
 
     if run_id != None: pc['run_id']=run_id
-    return tbl.insert(pc)
-
+    
+    lock=lf((dbfp+'.lock'))
+    lock.acquire()
+    o= tbl.insert(pc)
+    lock.release()
+    return o
 
 
 
