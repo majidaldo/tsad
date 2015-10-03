@@ -37,12 +37,12 @@ def env(ts_id):
     tbl=db[ts_id]
 
     ts=data.get(ts_id) 
-    tl=int(.75*len(ts))
+    tl=int(.75*len(ts)) #potential <-param here
     trn=data.list_call(ts[:tl])
     vld=data.list_call(ts[tl:])
     dim_out=dim_in=data.dim(ts_id)
 
-    noise=np.std(data.get_series(ts_id))
+    noise=np.std(data.get_series(ts_id))*.5 #<- critical param
     
         
 
