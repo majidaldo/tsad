@@ -3,7 +3,8 @@ import numpy as np
 import math
 
 
-#rnn.env('sleep')
+def env(ts_id):
+    rnn.env(ts_id)
 
 def main(job_id, params):
 
