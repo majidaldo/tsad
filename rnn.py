@@ -23,10 +23,13 @@ def env(ts_id):
     global noise
     
     mydir=os.path.split(os.path.realpath(__file__))[0];
-    os.chdir(mydir)
+    #os.chdir(mydir);
+    #mydir=os.path.curdir
 
     global dbfp
-    dbfp=os.path.join('experiments',ts_id,'output','rnn.sqlite')
+    #dbfp=os.path.join('experiments',ts_id,'output','rnn.sqlite')
+    dbfp=os.path.join('/db/',ts_id+'.sqlite')
+    dbfp=os.path.realpath(dbfp)
     #dbfp='test.sqlite'
     dbp='sqlite:///'+dbfp
     erase=False #for testing =True
@@ -35,7 +38,10 @@ def env(ts_id):
         except: pass
 
     db=dataset.connect(dbp)
-    tbl=db[ts_id]
+    lock=lf((dbfp+'.lock'))
+    lock.acquire()
+    tbl=db[ts_id];# tbl.insert({'test':123}); tbl.delete(test=123)
+    lock.release()
 
     ts=data.get(ts_id) 
     tl=int(.75*len(ts)) #potential <-param here
@@ -44,13 +50,11 @@ def env(ts_id):
     dim_out=dim_in=data.dim(ts_id)
 
     noise=np.std(data.get_series(ts_id))*.5 #<- critical param
-    
 
 
 
 def get_net(params,i=-1): # n -1 gets the last one interted
     """get str rep from db and put it into a file"""
-    
     pc=params.copy()
     found=list(tbl.find(**pc))
     #if len(found)>1: raise Exception('more than one model matched params')
@@ -70,7 +74,6 @@ def get_net(params,i=-1): # n -1 gets the last one interted
 from tempfile import NamedTemporaryFile as ntf
 from lockfile import LockFile as lf
 def save_net(params,net,run_id=None):
-    
     pc=params.copy()
 
     try:
@@ -107,7 +110,7 @@ def make_net(params):
 
 
 def function(params,run_id=None):
-
+    
     # get network
     
     pc=params.copy()
