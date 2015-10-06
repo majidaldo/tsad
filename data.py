@@ -30,8 +30,11 @@ def get_series(id):
         return txtrdr(id,skiprows=2,delimiter=',')[::3,2,None]
 
     elif 'sin'==id:
-        #import syn
+        #import syn why not work here???
         return syn.pulsegen()[:,None]
+
+    elif 'spike'==id:
+        return syn.cyclespike()
 
     #should not be here    
     raise KeyError('series not found')
