@@ -36,3 +36,13 @@ def pulsegen(**kwargs):
 #     nts[i]=sinewave(xs,nw=(i+1)*2)
 # nts[-1]=const(xs,c=1)
 
+def cyclespike(**kwargs):
+    e=kwargs.setdefault('every',20)
+    u=[0]*e
+    u[-1]=1
+    u=u*40
+    u=np.array(u,dtype='f32')
+    al=.8
+    ali=int(len(u)*al)
+    u[ali:ali+5]=.5
+    return u
