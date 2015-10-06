@@ -10,7 +10,7 @@ def main(job_id, params):
 
     
 
-    params['iter']=[itermap(params['iter'])]
+    params['iter']=[itermap(params['iter'][0])]
     no_array={}
     # for some reason params are arrays!!
     for aparam in params:
