@@ -4,45 +4,18 @@ import numpy as np
 import climate
 climate.enable_default_logging()
 
-import os
-import dataset
-
 import data
+import rnndb
 
 
 def env(ts_id):
     
-    global mydir
-    global db
-    global tbl
-
     global trn
     global vld
     global dim_out
     global dim_in
     global noise
     
-    mydir=os.path.split(os.path.realpath(__file__))[0];
-    #os.chdir(mydir);
-    #mydir=os.path.curdir
-
-    global dbfp
-    #dbfp=os.path.join('experiments',ts_id,'output','rnn.sqlite')
-    dbfp=os.path.join('/db/',ts_id+'.sqlite')
-    dbfp=os.path.realpath(dbfp)
-    #dbfp='test.sqlite'
-    dbp='sqlite:///'+dbfp
-    erase=False #for testing =True
-    if erase==True:
-        try: os.remove(dbfp)
-        except: pass
-
-    db=dataset.connect(dbp)
-    lock=lf((dbfp+'.lock'))
-    lock.acquire()
-    tbl=db[ts_id];# tbl.insert({'test':123}); tbl.delete(test=123)
-    lock.release()
-
     ts=data.get(ts_id) 
     tl=int(.75*len(ts)) #potential <-param here
     trn=data.list_call(ts[:tl])
@@ -50,47 +23,6 @@ def env(ts_id):
     dim_out=dim_in=data.dim(ts_id)
 
     noise=np.std(data.get_series(ts_id))*.5 #<- critical param
-
-
-
-def get_net(params,i=-1): # n -1 gets the last one interted
-    """get str rep from db and put it into a file"""
-    pc=params.copy()
-    found=list(tbl.find(**pc))
-    #if len(found)>1: raise Exception('more than one model matched params')
-    if len(found)==0: return None
-    found=found[i] # get's the last one inserted
-
-    try:
-        tfp=ntf(dir=mydir,suffix='.tmp',delete=False)
-        with open(tfp.name,'wb') as f: f.write(found['net'])
-        tfp.close()
-        net=theanets.Network.load(tfp.name)
-    finally: #cleanup
-        os.remove(tfp.name)
-    return net
-
-
-from tempfile import NamedTemporaryFile as ntf
-from lockfile import LockFile as lf
-def save_net(params,net,run_id=None):
-    pc=params.copy()
-
-    try:
-        tfp=ntf(dir=mydir,suffix='.tmp',delete=False)
-        net.save(tfp.name)
-        with open(tfp.name,'rb') as f: pc['net']=buffer(f.read())
-        tfp.close()
-    finally: #cleanup
-        os.remove(tfp.name)
-
-    if run_id != None: pc['run_id']=run_id
-    
-    lock=lf((dbfp+'.lock'))
-    lock.acquire()
-    o= tbl.insert(pc)
-    lock.release()
-    return o
 
 
 
@@ -146,7 +78,7 @@ def function(params,run_id=None):
         if state=='previous iter found':
             pcc=pc.copy()
             pcc['iter']=lastiter
-            net=get_net(pcc,i=nthisiter) #'careful! looks good
+            net=rnndb.get_net(pcc,i=nthisiter) #'careful! looks good
         elif state=='no previous iter':
             net=make_net(pc)
         else:
@@ -185,7 +117,7 @@ def function(params,run_id=None):
             o= xpit.next()[1]['loss']
             if math.isnan(o):
                 raise ValueError('got nan validation')
-            save_net(params,xp.network)
+            rnndb.save_net(params,xp.network)
         except StopIteration: pass
             
     save_net(params,xp.network,run_id=run_id)
