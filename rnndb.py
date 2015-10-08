@@ -8,7 +8,7 @@ import os
 
 import pickle
 from bson.binary import Binary
-import theanets
+import theanets #todo: set a version/commit
 
 _mydir,_=os.path.split(os.path.realpath(__file__))
 
@@ -18,7 +18,7 @@ def get_net(ts_id
     """get str rep from db and put it into a file"""
     tbl=col=db[ts_id] #'collection'
     
-    pc=params.copy()
+    pc=tomongotypes(params)
     found=list(tbl.find(pc))
     #if len(found)>1: raise Exception('more than one model matched params')
     if len(found)==0: return None
@@ -39,8 +39,10 @@ def save_net(ts_id
              ,params,net
              ,run_id=None):
     tbl=col=db[ts_id] #'collection'
-    pc=params.copy()
 
+    if run_id != None: pc['run_id']=run_id
+    pc=tomongotypes(params)
+    
     tfp=ntf(dir=_mydir,suffix='.tmp',delete=False)
     try:
         net.save(tfp.name);tfp.close()
@@ -48,11 +50,21 @@ def save_net(ts_id
         tfp.close()
     finally: #cleanup
         os.remove(tfp.name)
-
-    if run_id != None: pc['run_id']=run_id
-    
+        
     o= tbl.insert_one(pc).inserted_id
     return o
 
 
 
+def tomongotypes(params):
+    mt={}
+    for ap in params:
+        try: #chk for number
+            params[ap]/1.0
+            #just using ints but could use floats for flexibility
+            mt[ap]=float(params[ap]) 
+        except:
+            mt[ap]=params[ap]
+
+    return mt
+    
