@@ -12,6 +12,18 @@ import theanets #todo: set a version/commit
 
 _mydir,_=os.path.split(os.path.realpath(__file__))
 
+
+def find(ts_id
+        ,params):
+    tbl=db[ts_id]
+    pc=tomongotypes(params)
+    return tbl.find(pc)
+
+def distinct_iters(ts_id
+                   ,params):
+    found=find(ts_id,params)
+    return found.distinct('iter')
+
 def get_net(ts_id
             ,params
             ,i=-1): # n -1 gets the last one interted
@@ -68,3 +80,4 @@ def tomongotypes(params):
 
     return mt
     
+# todo: climate loggind stdout

@@ -9,6 +9,8 @@ import rnndb
 
 
 def env(ts_id):
+    global gts_id
+    gts_id=ts_id
     
     global trn
     global vld
@@ -47,7 +49,7 @@ def function(params,run_id=None):
     
     pc=params.copy()
     pc.pop('iter')
-    netfind=list(tbl.find(**pc))
+    netfind=list(rnndb.find(gts_id,pc))
     # has a net with these params ever been created?
     if len(netfind)==0:
         net=make_net(pc)
@@ -55,18 +57,18 @@ def function(params,run_id=None):
         state                             ='new';                 stateit=0
     else:
         # is there a previous net to resume from?
-        lastiters=[arow['iter'] for arow in tbl.distinct('iter',**pc) \
-                   if arow['iter']<params['iter']]
+        lastiters=[int(ait) for ait in rnndb.distinct_iters(gts_id,pc) \
+                   if ait<params['iter']]
         if len(lastiters)==0:        state='no previous iter';    stateit=1
         else:
             lastiter=sorted(lastiters)
             lastiter=lastiter[-1]
         
             # chk how many lastiter vs thisiter
-            thisiters=list(tbl.find(**params))
+            thisiters=list(rnndb.find(gts_id,params))
             pcc=pc.copy()
             pcc['iter']=lastiter
-            lastiters=list(tbl.find(**pcc))
+            lastiters=list(rnndb.find(gts_id,pcc))
             nthisiter=len(thisiters)
             nlastiter=len(lastiters)
 
@@ -78,7 +80,7 @@ def function(params,run_id=None):
         if state=='previous iter found':
             pcc=pc.copy()
             pcc['iter']=lastiter
-            net=rnndb.get_net(pcc,i=nthisiter) #'careful! looks good
+            net=rnndb.get_net(gts_id,pcc,i=nthisiter) #'careful! looks good
         elif state=='no previous iter':
             net=make_net(pc)
         else:
@@ -117,30 +119,31 @@ def function(params,run_id=None):
             o= xpit.next()[1]['loss']
             if math.isnan(o):
                 raise ValueError('got nan validation')
-            rnndb.save_net(params,xp.network)
+            rnndb.save_net(gts_id,params,xp.network)
         except StopIteration: pass
             
-    save_net(params,xp.network,run_id=run_id)
+    rnndb.save_net(gts_id,params,xp.network,run_id=run_id)
     return o #should return the o from the .next() w/o the stopiteration
 
 
-
-
+#todo: have a 'test' ts
 def test():
-    function({'n1':1,'iter':0})
-    #function({'n1':1,'iter':0}) # should be a new model
-    function({'n1':1,'iter':3}) # should pick up where left off
-    #function({'n1':1,'iter':4} #shld pick up where left off
-    function({'n1':1,'iter':5}) #shld pick up where left off
-    function({'n1':1,'iter':5}) # shld be new
+    p={'nl':1,'n':1}
+    for ait in [0,0,3,4,5,5]: p['iter']=ait; function(p)
+    # function({'nl':1,'iter':0})
+    # #function({'n1':1,'iter':0}) # should be a new model
+    # function({'nl':1,'iter':3}) # should pick up where left off
+    # #function({'n1':1,'iter':4} #shld pick up where left off
+    # function({'nl':1,'iter':5}) #shld pick up where left off
+    # function({'nl':1,'iter':5}) # shld be new
     
 def testseq():
-    function({'n1':1,'iter':0})
-    function({'n1':1,'iter':1}) # should pick up where left off
-    function({'n1':1,'iter':2}) #shld pick up where left off
-    function({'n1':1,'iter':1}) # should be new
+    function({'nl':1,'iter':0})
+    function({'nl':1,'iter':1}) # should pick up where left off
+    function({'nl':1,'iter':2}) #shld pick up where left off
+    function({'nl':1,'iter':1}) # should be new
 
 def testtwo():
-    function({'n1':1,'iter':9})
-    function({'n1':1,'iter':9}) # new
+    function({'nl':1,'iter':9})
+    function({'nl':1,'iter':9}) # new
 
