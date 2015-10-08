@@ -1,6 +1,6 @@
 import pymongo
 con=pymongo.MongoClient('localhost',27017)
-db=con.drop_database('rnn')
+#db=con.drop_database('rnn')
 db=con['rnn']
 
 from tempfile import NamedTemporaryFile as ntf
