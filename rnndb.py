@@ -52,7 +52,7 @@ def save_net(ts_id
              ,run_id=None):
     tbl=col=db[ts_id] #'collection'
 
-    if run_id != None: pc['run_id']=run_id
+    if run_id != None: params['run_id']=run_id
     pc=tomongotypes(params)
     
     tfp=ntf(dir=_mydir,suffix='.tmp',delete=False)
