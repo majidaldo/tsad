@@ -1,7 +1,6 @@
 {
 
-    "experiment-name": "sleep",
-    "database": {"address":"localhost"},
+    "experiment-name": "sin",
     "language"   : "PYTHON",
     
     "resources" : {
@@ -16,7 +15,7 @@
 	"main" : {
 	    "type"       : "OBJECTIVE",
 	    "likelihood" : "GAUSSIAN",
-	    "main-file"  : "po.py",
+	    "main-file"  : "o.py",
 	    "resources"  : ["my-machine"]
 	}
     },
