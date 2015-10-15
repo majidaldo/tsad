@@ -26,7 +26,7 @@ def env(ts_id,**kwargs):
     vld=data.list_call(ts[tl:])
     dim_out=dim_in=data.dim(ts_id)
 
-    noise=np.std(data.get_series(ts_id))*.5 #<- critical param
+    noise=np.std(data.get_series(ts_id))*.75 #<- critical param
 
 
 
