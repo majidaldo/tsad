@@ -2,9 +2,10 @@ import numpy as np
 import scipy as sp
 from scipy import stats
 
+#todo move to ./data
 
 def xs(**kwargs):
-    return np.linspace(0,1,1e3,dtype='f32')
+    return np.linspace(0,1,1e3,dtype='float32')
 
 def sinewave(xs,**kwargs):
     nw=kwargs.setdefault('nw',1) #num waves
@@ -28,7 +29,7 @@ def pulse(xs,**kwargs):
 
 
 def pulsegen(**kwargs):
-    return np.array(pulse(xs()),dtype='f32')
+    return np.array(pulse(xs()),dtype='float32')
 
 # #generate an even number of waves in the re
 # nts=np.empty((100,len(xs)))
@@ -41,7 +42,7 @@ def cyclespike(**kwargs):
     u=[0]*e
     u[-1]=1
     u=u*40
-    u=np.array(u,dtype='f32')
+    u=np.array(u,dtype='float32')
     al=.8
     ali=int(len(u)*al)
     u[ali:ali+5]=.5

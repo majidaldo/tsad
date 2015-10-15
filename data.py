@@ -9,7 +9,7 @@ def get_series(id):
     """returns 2d shape (time,ndim)"""
     
     def txtrdr(*args,**kwargs):
-        kwargs.setdefault('dtype','f32')
+        kwargs.setdefault('dtype','float32')
         return np.loadtxt(os.path.join('data',id),**kwargs)
     
     if 'ecg' in id:
@@ -35,6 +35,11 @@ def get_series(id):
 
     elif 'spike'==id:
         return syn.cyclespike()
+
+    elif 'test'==id:
+        return get_series('sin')
+
+    #md
 
     #should not be here    
     raise KeyError('series not found')
@@ -106,7 +111,7 @@ def window(id,**kwargs):
     ts=get_series(id)
     for awin in win(ts,**kwargs):
         a.append(awin)
-    return np.array(a,dtype='f32')
+    return np.array(a,dtype='float32')
 
 
 
