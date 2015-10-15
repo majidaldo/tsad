@@ -6,10 +6,10 @@ def con():
     rtdir,_=os.path.split(os.path.realpath(__file__))
     from ipyparallel import Client
     c=Client(
-        url_file=None
-        #url_file=rtdir+'/../files/.ipython/profile_default/security/ipcontroller-client.json'
-#             ,sshserver='core@init'
-#             ,sshkey='c:/Users/Majid/.vagrant.d/insecure_private_key'
+        #url_file=None
+        #url_file=os.path.join(rtdir,'../files/.ipython/profile_default/security/ipcontroller-client.json')
+         #    ,sshserver='core@init'
+         #    ,sshkey='c:/Users/Majid/.vagrant.d/insecure_private_key'
              #,paramiko=False
              #,debug=True
     )

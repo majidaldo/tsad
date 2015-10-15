@@ -1,5 +1,5 @@
 import pymongo
-con=pymongo.MongoClient('localhost',27017)
+con=pymongo.MongoClient('mongodb',27017)
 #db=con.drop_database('rnn')
 db=con['rnn']
 
