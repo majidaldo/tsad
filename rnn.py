@@ -8,9 +8,11 @@ import data
 import rnndb
 
 
-def env(ts_id):
+def env(ts_id,**kwargs):
+    """use dbts_id='test' kwargs to test things"""
+    
     global gts_id
-    gts_id=ts_id
+    gts_id=kwargs.setdefault('dbts_id',ts_id)
     
     global trn
     global vld
