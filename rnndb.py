@@ -1,5 +1,6 @@
 import pymongo
-con=pymongo.MongoClient('mongodb',27017)
+from config import config
+con=pymongo.MongoClient(config['rnndb'],27017)
 #db=con.drop_database('rnn')
 db=con['rnn']
 
@@ -55,7 +56,7 @@ def save_net(ts_id
     if run_id != None: params['run_id']=run_id
     pc=tomongotypes(params)
     
-    tfp=ntf(dir=_mydir,suffix='.tmp',delete=False)
+    tfp=ntf(suffix='.tmp',delete=False)
     try:
         tfp.close();#b/c it looks like .save() tries to do that
         net.save(tfp.name)

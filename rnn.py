@@ -119,8 +119,7 @@ def function(params,run_id=None):
             o= xpit.next()[1]['loss']
             if math.isnan(o):
                 raise ValueError('got nan validation')
-            try: rnndb.save_net(gts_id,params,xp.network)
-            except IOError: pass # some unpredictable problem!!!
+            rnndb.save_net(gts_id,params,xp.network)
         except StopIteration: pass
             
     rnndb.save_net(gts_id,params,xp.network,run_id=run_id)
