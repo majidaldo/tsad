@@ -36,10 +36,11 @@ def get_series(id):
     elif 'spike'==id:
         return syn.cyclespike()
 
+    elif 'twitter'==id:
+        return txtrdr(id,skiprows=1,usecols=(3,))[:,None]
+
     elif 'test'==id:
         return get_series('sin')
-
-    #md
 
     #should not be here    
     raise KeyError('series not found')
@@ -49,7 +50,7 @@ def get_series(id):
         
 def get_kwargs(id,**kwargs):
     # nice to check the number of batches
-    # winbatch(ts,getKwargs(ts)).length should be 'reasonable'
+    # winbatch(ts,**getKwargs(ts)).length should be 'reasonable'
     
     kwargs2=kwargs.copy()
     
@@ -73,6 +74,9 @@ def get_kwargs(id,**kwargs):
         kwargs['batch_size']=   30
 
     elif 'sin'==id:
+        kwargs['batch_size']=   30
+
+    elif 'twitter'==id:
         kwargs['batch_size']=   30
 
     #else:
