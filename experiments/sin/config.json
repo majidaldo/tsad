@@ -1,13 +1,14 @@
 {
 
     "experiment-name": "sin",
+    "database": {"address":"localhost"},
     "language"   : "PYTHON",
     
     "resources" : {
 	"my-machine" : {
 	    "scheduler"         : "local",
 	    "max-concurrent"    : 1,
-	    "max-finished-jobs" : 50
+	    "max-finished-jobs" : 20
 	}
     },
 
