@@ -57,7 +57,9 @@ def save_net(ts_id
     
     tfp=ntf(dir=_mydir,suffix='.tmp',delete=False)
     try:
-        net.save(tfp.name);tfp.close()
+        tfp.close();#b/c it looks like .save() tries to do that
+        net.save(tfp.name)
+        tfp.close() #just in case
         pc['net']=pickle.dumps(net.load(tfp.name))
         tfp.close()
     finally: #cleanup
