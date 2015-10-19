@@ -78,6 +78,7 @@ def get_kwargs(id,**kwargs):
 
     elif 'twitter'==id:
         kwargs['batch_size']=   30
+        kwargs['min_winsize']=  4000
 
     #else:
     #    raise KeyError
