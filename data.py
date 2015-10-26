@@ -34,7 +34,7 @@ def get_series(id):
         return syn.pulsegen()[:,None]
 
     elif 'spike'==id:
-        return syn.cyclespike()
+        return syn.cyclespike()[:,None]
 
     elif 'twitter'==id:
         return txtrdr(id,skiprows=1,usecols=(3,))[:,None]
