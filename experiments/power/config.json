@@ -1,0 +1,49 @@
+{
+
+    "experiment-name": "power",
+    "database": {"address":"localhost"},
+    "language"   : "PYTHON",
+    
+    "resources" : {
+	"my-machine" : {
+	    "scheduler"         : "local",
+	    "max-concurrent"    : 1,
+	    "max-finished-jobs" : 20
+	}
+    },
+
+    "tasks": {
+	"main" : {
+	    "type"       : "OBJECTIVE",
+	    "likelihood" : "GAUSSIAN",
+	    "main-file"  : "o.py",
+	    "resources"  : ["my-machine"]
+	}
+    },
+    
+    "variables" : {
+	"nl" : {
+	    "type" : "INT",
+	    "size" : 1,
+	    "min"  : 1,
+	    "max"  : 2
+	},
+	"n" : {
+	    "type" : "INT",
+	    "size" : 1,
+	    "min"  : 1,
+	    "max"  : 10
+	},
+	"iter" : {
+	    "type" : "FLOAT",
+	    "size" : 1,
+	    "min"  : 0,
+	    "max"  : 1
+	}
+    }
+}
+
+
+
+
+
