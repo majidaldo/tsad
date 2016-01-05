@@ -43,7 +43,7 @@ def get_series(id):
         return get_series('sin')
 
     elif 'power'==id:# http://www.cs.ucr.edu/~eamonn/discords/
-        return txtrdr(id,skiprows=0)[:,None]
+        return txtrdr(id,skiprows=0)[::5,None]
 
     #should not be here    
     raise KeyError('series not found')
@@ -84,9 +84,9 @@ def get_kwargs(id,**kwargs):
         kwargs['min_winsize']=  4000
 
     elif 'power'==id:
-        kwargs['min_winsize']=  1000
-        kwargs['slide_jump']=   500
-        kwargs['winsize_jump']= 200
+        kwargs['min_winsize']=  100
+        kwargs['slide_jump']=   100
+        kwargs['winsize_jump']= 20
         kwargs['batch_size']=   30
 
     #else:
