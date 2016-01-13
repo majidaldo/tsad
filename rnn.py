@@ -96,7 +96,7 @@ def function(params,run_id=None):
                        ,algorithm='rmsprop'
                        ,input_noise=noise
                        #,input_dropout=.3 #idk how this would app here
-                       ,nesterov=True
+                       ,nesterov=True #no effect if mom=0 (default)
                        #,max_gradient_norm=1
                        ,learning_rate=0.0001 #default
                        #,batch_size=bs
