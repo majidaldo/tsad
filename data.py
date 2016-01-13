@@ -4,13 +4,19 @@ from window import winbatch
 import syn
 
 import os
+import sys
+
+
 
 def get_series(id):
     """returns 2d shape (time,ndim)"""
-    
     def txtrdr(*args,**kwargs):
         kwargs.setdefault('dtype','float32')
-        return np.loadtxt(os.path.join('data',id),**kwargs)
+        return np.loadtxt(os.path.join(os.path.split(os.path.abspath(
+                sys.modules[__name__].__file__))[0]
+            ,'data'
+            ,id)
+            ,**kwargs)
     
     if 'ecg' in id:
         ecg=txtrdr()[::20,None] 
@@ -43,7 +49,8 @@ def get_series(id):
         return get_series('sin')
 
     elif 'power'==id:# http://www.cs.ucr.edu/~eamonn/discords/
-        return txtrdr(id,skiprows=0)[::5,None]
+        pd=txtrdr(id,skiprows=0)[::5,None]
+        return pd/np.median(pd)
 
     #should not be here    
     raise KeyError('series not found')
