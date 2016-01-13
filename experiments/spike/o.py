@@ -6,6 +6,4 @@ import sys
 sys.path.append('../..')
 from omain import *
 
-import os
-os.chdir(os.path.join('..','..'))
 env(xpnm)
