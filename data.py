@@ -33,6 +33,8 @@ def get_series(id):
         
     elif 'sleep'==id:
         #from https://physionet.org/atm/ucddb/ucddb002_lifecard.edf/180/60/rdsamp/csv/pS/samples.csv
+        #St. Vincent's University Hospital / University College Dublin
+        #Sleep Apnea Database
         return txtrdr(id,skiprows=2,delimiter=',')[::3,2,None]
 
     elif 'sin'==id:
