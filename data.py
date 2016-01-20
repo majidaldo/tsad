@@ -54,6 +54,10 @@ def get_series(id):
         pd=txtrdr(id,skiprows=0)[::5,None]
         return pd/np.median(pd)
 
+    elif 'lintrend'==id:# yahoo anom det A4Benchmark-TS2
+        pd=txtrdr(id,skiprows=1,delimiter=',',usecols=(1,))[:,None]
+        return pd/np.median(pd)
+
     #should not be here    
     raise KeyError('series not found')
 
@@ -97,6 +101,10 @@ def get_kwargs(id,**kwargs):
         kwargs['slide_jump']=   100
         kwargs['winsize_jump']= 20
         kwargs['batch_size']=   30
+
+    elif 'lintrend'==id:
+        kwargs['winsize_jump']=30
+        kwargs['slide_jump']=30
 
     #else:
     #    raise KeyError
