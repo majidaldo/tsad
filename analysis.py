@@ -1,3 +1,6 @@
+import pandas as pd
+import numpy as np
+
 from config import config
 # get data from db
     
@@ -5,7 +8,7 @@ from spearmint.utils.database.mongodb import MongoDB
 mdb=MongoDB(config['rnndb']) #samd db as rnns
 
 
-import pandas as pd
+
 def get_runs(xpnm):
     jobs=mdb.load(xpnm,'jobs',{'status':'complete'})
     try: jobs[0]
@@ -13,7 +16,6 @@ def get_runs(xpnm):
     finally: params=jobs[0]['params'].keys()
 
     data=[]
-    import numpy as np
     for ajb in jobs:
         arow=[]
         for ap in params:
@@ -73,3 +75,36 @@ def get_errs(wints,net):
     for i in xrange(wints.shape[0]):
         errs.append(metrics.mean_squared_error(wints[i,:,0],p[i])**1 )
     return errs
+
+
+from pandas import rolling_apply
+import data
+def errs(ts_id,win,**kwargs):
+    ts=data.get_series(ts_id)[:,0]
+    tsdf=pd.Series(ts)
+    bn=get_best_net(ts_id)
+    mse=lambda win:np.mean(
+        bn.predict(np.array(win,dtype='float32')[:,None,None])
+        -win
+    )**2
+    if win==0: #no window. just return all errors at once
+        pr= (bn.predict(ts[:,None,None])[:,0,0]-ts)**2;
+        return pr
+    return \
+        rolling_apply(tsdf
+                      ,win
+                      ,mse
+                      ,center=True
+        )
+    
+
+#bodiag rng nl and n
+def bo_diag(ts_id):
+    d=get_runs(ts_id)
+    d=d[d['iter']>.99] #just get the converged ones
+    d=d[d.columns.drop(['run_id','iter'])] #no need
+    # still has objects instead of elems of a dtype
+    d['n']=np.array(d['n'],dtype=np.int)
+    d['nl']=np.array(d['nl'],dtype=np.int)
+    d=d.sort_values(by=['nl','n'])
+    return d
