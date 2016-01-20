@@ -108,3 +108,4 @@ def bo_diag(ts_id):
     d['nl']=np.array(d['nl'],dtype=np.int)
     d=d.sort_values(by=['nl','n'])
     return d
+
