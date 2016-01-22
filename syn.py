@@ -56,7 +56,7 @@ def cyclespikereg(**kwargs):
     u=np.array(u,dtype='float32')
     al=.8
     ali=int(len(u)*al)
-    u[ali:ali+5]=1
+    u[ali+5]=1
     return u
 
 def cyclespikelv(**kwargs):
