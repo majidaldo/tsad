@@ -113,6 +113,11 @@ def get_kwargs(id,**kwargs):
         kwargs['winsize_jump']=30
         kwargs['slide_jump']=30
 
+    elif 'spike' in id:
+        kwargs['winsize_jump']=20
+        kwargs['slide_jump']=20
+        kwargs['min_winsize']=100
+
     #else:
     #    raise KeyError
 
