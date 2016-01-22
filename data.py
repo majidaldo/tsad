@@ -58,6 +58,11 @@ def get_series(id):
         pd=txtrdr(id,skiprows=1,delimiter=',',usecols=(1,))[:,None]
         return pd/np.median(pd)
 
+    elif 'sleeptest'==id:#the anom region is just avg of data
+        d=get_series('sleep')
+        d[1500:1740,0]=np.mean(d[:,0])
+        return d
+
     #should not be here    
     raise KeyError('series not found')
 
