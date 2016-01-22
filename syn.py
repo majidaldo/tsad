@@ -47,3 +47,14 @@ def cyclespike(**kwargs):
     ali=int(len(u)*al)
     u[ali:ali+5]=.5
     return u
+
+def cyclespikereg(**kwargs):
+    e=kwargs.setdefault('every',20)
+    u=[0]*e
+    u[-1]=1
+    u=u*40
+    u=np.array(u,dtype='float32')
+    al=.8
+    ali=int(len(u)*al)
+    u[ali:ali+5]=1
+    return u

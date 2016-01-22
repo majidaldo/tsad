@@ -43,6 +43,8 @@ def get_series(id):
 
     elif 'spike'==id:
         return syn.cyclespike()[:,None]
+    elif 'spikereg'==id:
+        return syn.cyclespikereg()[:,None]
 
     elif 'twitter'==id:
         return txtrdr(id,skiprows=1,usecols=(3,))[:,None]
