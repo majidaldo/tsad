@@ -121,6 +121,7 @@ def bo_diag(ts_id):
 
 
 def get_log(ts_id,run_id):
+    run_id=int(run_id)
     thisdir=os.path.split(os.path.abspath(configmod.__file__))[0]
     run_id=str(run_id)
     fn= '0'*(8-len(run_id))+run_id+'.out'
