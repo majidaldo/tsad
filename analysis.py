@@ -130,5 +130,17 @@ def get_log(ts_id,run_id):
 
 
 def get_epocherr(ts_id,run_id):
+    v=[]; t=[]
     for al in get_log(ts_id,run_id):
-        print al
+        if 'loss=' in al:
+            if 'validation' in al:
+                erri=al.find('err=')
+                lssi=al.find('loss=')
+                v.append(float(al[lssi+len('loss='):erri-1]))
+            elif 'loss=' in al: #training loss
+                erri=al.find('err=')
+                lssi=al.find('loss=')
+                t.append(float(al[lssi+len('loss='):erri-1]))
+    v=v[1:] #chop off first validation
+    assert len(v)==len(t)
+    return {'val':v,'trn':t}
