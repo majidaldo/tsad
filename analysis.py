@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
+import os
 
+import config as configmod
 from config import config
 # get data from db
     
@@ -108,4 +110,14 @@ def bo_diag(ts_id):
     d['nl']=np.array(d['nl'],dtype=np.int)
     d=d.sort_values(by=['nl','n'])
     return d
+
+
+def get_log(ts_id,run_id):
+    thisdir=os.path.split(os.path.abspath(configmod.__file__))[0]
+    run_id=str(run_id)
+    fn= '0'*(8-len(run_id))+run_id+'.out'
+    fn= (os.path.join(thisdir,'experiments',ts_id,'output',fn))
+    return open(fn).read()
+
+#todo chk for patience in log
 
