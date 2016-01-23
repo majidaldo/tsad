@@ -103,7 +103,15 @@ def errs(ts_id,win,**kwargs):
 #bodiag rng nl and n
 def bo_diag(ts_id):
     d=get_runs(ts_id)
-    d=d[d['iter']>.99] #just get the converged ones
+    for ar in d['run_id']:
+        if 'patience elapsed' in get_log(ts_id,ar):
+            ri=d[d['run_id']==ar].index;
+            if  d.loc[ri,'iter'].any()==1: pass
+            else:
+                if 'patience elapsed' in get_log(ts_id,ar):
+                    d.loc[ri,'iter']=1
+                else: pass
+    d=d[d['iter']==1] #just get the ones that i'm sure patience elapsed
     d=d[d.columns.drop(['run_id','iter'])] #no need
     # still has objects instead of elems of a dtype
     d['n']=np.array(d['n'],dtype=np.int)
@@ -119,5 +127,8 @@ def get_log(ts_id,run_id):
     fn= (os.path.join(thisdir,'experiments',ts_id,'output',fn))
     return open(fn).read()
 
-#todo chk for patience in log
+
+
+
+#todo chk for patience in log 'patience elapsed'
 
