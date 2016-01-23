@@ -144,4 +144,4 @@ def get_epocherr(ts_id,run_id):
                 t.append(float(al[lssi+len('loss='):erri-1]))
     v=v[1:] #chop off first validation
     assert len(v)==len(t)
-    return {'val':v,'trn':t}
+    return {'vld':v,'trn':t}
