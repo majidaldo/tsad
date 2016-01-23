@@ -90,6 +90,7 @@ def function(params,run_id=None):
     #not elegant but whatever
     print 'stateit',stateit
 
+    net._rng=13
     xp=theanets.Experiment(net)
     
     xpit=xp.itertrain( trn , vld
