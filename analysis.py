@@ -108,7 +108,7 @@ def bo_diag(ts_id):
             ri=d[d['run_id']==ar].index;
             if  d.loc[ri,'iter'].any()==1: pass
             else:
-                if 'patience elapsed' in get_log(ts_id,ar):
+                if 'patience elapsed' in str(get_log(ts_id,ar)):
                     d.loc[ri,'iter']=1
                 else: pass
     d=d[d['iter']==1] #just get the ones that i'm sure patience elapsed
@@ -125,10 +125,10 @@ def get_log(ts_id,run_id):
     run_id=str(run_id)
     fn= '0'*(8-len(run_id))+run_id+'.out'
     fn= (os.path.join(thisdir,'experiments',ts_id,'output',fn))
-    return open(fn).read()
+    return open(fn).readlines()
 
 
 
-
-#todo chk for patience in log 'patience elapsed'
-
+def get_epocherr(ts_id,run_id):
+    for al in get_log(ts_id,run_id):
+        print al
